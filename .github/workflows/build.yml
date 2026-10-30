@@ -51,7 +51,7 @@ jobs:
 
       - name: Build APK
         working-directory: project
-        run: ./gradlew assembleDebug --no-daemon
+        run:  gradle assembleDebug --no-daemon
 
       - name: Save APK
         uses: actions/upload-artifact@v4
