@@ -24,7 +24,20 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd $ANDROID_HOME/cmdline-tools
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q commandlinetools-linux-11076708_latest.zip
+          mv cmdline-tools latest
+          rm commandlinetools-linux-11076708_latest.zip
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "platform-tools"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -33,12 +46,12 @@ jobs:
 
       - name: Unpack project
         run: |
-          test -f PianoProject.zip
+          test -f PianoProject.zip || { echo "PianoProject.zip not found!"; exit 1; }
           unzip -q PianoProject.zip -d project
 
       - name: Build APK
         working-directory: project
-        run: gradle assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Save APK
         uses: actions/upload-artifact@v4
